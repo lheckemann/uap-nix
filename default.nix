@@ -60,7 +60,6 @@ import nixpkgs {
           mount -t sysfs sys /sys
           mkdir -p /run
           mount -t tmpfs tmpfs /run
-          ${self.eudev}/bin/udevd &
           ip l set eth0 up
           ${self.cal-wifi}
           exec sh
