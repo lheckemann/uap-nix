@@ -30,24 +30,27 @@ import nixpkgs {
       compressor = "${self.pkgsBuildHost.zstd}/bin/zstd";
       makeUInitrd = true;
       contents = [{
-        object = "${self.busybox}/bin";
+        object = (super.buildEnv {
+          name = "uap-nix-bin";
+          paths = [
+            self.busybox
+            self.hostapd
+            (super.writeScriptBin "debug-wifi" ''
+              #!/bin/sh
+              echo 0xffffffff > /sys/module/ath10k_core/parameters/debug_mask
+              echo 8 > /proc/sys/kernel/printk
+              cd /sys/bus/pci/drivers/ath10k_pci
+              echo 0000:00:00.0 > unbind
+              echo 0000:00:00.0 > bind
+            '')
+            (lib.hiPrio (super.writeScriptBin "reboot" ''
+              #!/bin/sh
+              echo b > /proc/sysrq-trigger
+            ''))
+          ];
+          pathsToLink = ["/bin"];
+        }) + "/bin";
         symlink = "/bin";
-      } {
-        object = super.writeScript "r" ''
-          #!/bin/sh
-          echo b > /proc/sysrq-trigger
-        '';
-        symlink = "/sbin/r";
-      } {
-        object = super.writeScript "debug-wifi" ''
-          #!/bin/sh
-          echo 0xffffffff > /sys/module/ath10k_core/parameters/debug_mask
-          echo 8 > /proc/sys/kernel/printk
-          cd /sys/bus/pci/drivers/ath10k_pci
-          echo 0000:00:00.0 > unbind
-          echo 0000:00:00.0 > bind
-        '';
-        symlink = "/sbin/debug-wifi";
       } {
         object = super.writeScript "init" ''
           #!/bin/sh
@@ -70,9 +73,6 @@ import nixpkgs {
           cp -r ${self.wireless-regdb}/lib/firmware/regulatory.db $out/
         '';
         symlink = "/lib/firmware";
-      } {
-        object = self.hostapd;
-        symlink = "/hostapd";
       } {
         object = super.writeText "hostapd.conf" ''
           interface=wlan0
