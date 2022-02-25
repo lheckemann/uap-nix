@@ -7,7 +7,7 @@ Playing around with nixpkgs's cross-compilation support.
 - Linux boots!
 - Just an initramfs for the filesystem.
 - Ethernet works in Linux.
-- WiFi probably should work, but I haven't managed to configure hostapd right yet.
+- A WiFi AP is set up, with WPA, and can be associated with. This doesn't actually provide access to any network (other than the link itself) yet though.
 
 ## How to use
 
