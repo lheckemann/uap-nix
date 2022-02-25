@@ -35,6 +35,13 @@ import nixpkgs {
           paths = [
             self.busybox
             self.hostapd
+            self.iw
+            (super.writeScriptBin "reset-wifi" ''
+              #!/bin/sh
+              cd /sys/bus/pci/drivers/ath10k_pci
+              echo 0000:00:00.0 > unbind
+              echo 0000:00:00.0 > bind
+            '')
             (super.writeScriptBin "debug-wifi" ''
               #!/bin/sh
               echo 0xffffffff > /sys/module/ath10k_core/parameters/debug_mask
