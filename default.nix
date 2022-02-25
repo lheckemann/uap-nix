@@ -76,7 +76,7 @@ import nixpkgs {
         object = super.runCommandNoCC "firmware-ath10k" {} ''
           mkdir -p $out/ath10k
           cp -r ${self.firmwareLinuxNonfree}/lib/firmware/ath10k/QCA988X $out/ath10k/
-          cp -r ${self.wireless-regdb}/lib/firmware/regulatory.db $out/
+          cp -r ${self.wireless-regdb}/lib/firmware/* $out/
         '';
         symlink = "/lib/firmware";
       } {
