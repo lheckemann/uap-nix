@@ -50,6 +50,11 @@ import nixpkgs {
               echo 0000:00:00.0 > unbind
               echo 0000:00:00.0 > bind
             '')
+            (super.writeScriptBin "cal-wifi" ''
+              #!/bin/sh
+              mtd=$(grep '"art"' /proc/mtd | cut -d : -f 1)
+              dd if=/dev/$mtd of=/lib/firmware/ath10k/cal-pci-0000:00:00.0.bin iflag=skip_bytes,fullblock bs=$((0x844)) skip=$((0x5000)) count=1
+            '')
             (lib.hiPrio (super.writeScriptBin "reboot" ''
               #!/bin/sh
               echo b > /proc/sysrq-trigger
@@ -68,7 +73,12 @@ import nixpkgs {
           mkdir -p /run
           mount -t tmpfs tmpfs /run
           ip l set eth0 up
-          ${self.cal-wifi}
+          cal-wifi
+          reset-wifi
+          sleep 3 # hackhack
+          ip l set wlan0 up
+          iw dev wlan0 scan >/dev/null
+          hostapd /etc/hostapd.conf &
           exec sh
         '';
         symlink = "/init";
@@ -82,28 +92,25 @@ import nixpkgs {
       } {
         object = super.writeText "hostapd.conf" ''
           interface=wlan0
-          ssid=test
-          country_code=DE
-          wpa=1
-          wpa_psk=d27c89adbd8dd3f811a09bb662e78441a4842517486af5b9a4b377f460fd9fc7
-          wpa_pairwise=CCMP
           hw_mode=a
-
-          wmm_enabled=1
+          ssid=uap-nix
+          country_code=DE
+          ieee80211h=1
           ieee80211n=1
           ieee80211ac=1
-
-          channel=0
+          ieee80211d=1
+          driver=nl80211
+          wmm_enabled=1
+          auth_algs=1
+          wpa=2
+          wpa_key_mgmt=WPA-PSK
+          rsn_pairwise=CCMP
+          wpa_passphrase=abcdefgh
+          channel=36
         '';
         symlink = "/etc/hostapd.conf";
       } ];
     };
-
-    cal-wifi = super.writeScript "cal-wifi" ''
-      #!/bin/sh
-      mtd=$(grep '"art"' /proc/mtd | cut -d : -f 1)
-      dd if=/dev/$mtd of=/lib/firmware/ath10k/cal-pci-0000:00:00.0.bin iflag=skip_bytes,fullblock bs=$((0x844)) skip=$((0x5000)) count=1
-    '';
 
     lib = super.lib // {
       elementsInDir = dir: lib.mapAttrsToList (name: type: { inherit type name; path = dir + "/${name}"; }) (builtins.readDir dir);
