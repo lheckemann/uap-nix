@@ -162,6 +162,7 @@ import nixpkgs {
         PCI_AR724X = yes;
         CFG80211 = yes;
         MAC80211 = yes;
+        RFKILL = yes;
         ATH_COMMON = yes;
         ATH10K = yes;
         ATH10K_PCI = yes;
@@ -169,6 +170,10 @@ import nixpkgs {
 
         # Other
         IPV6 = yes;
+
+        NEW_LEDS = yes;
+        LEDS_CLASS = yes;
+        LEDS_GPIO = yes;
 
         # minimalisation
         ATH9K = no;
