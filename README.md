@@ -63,8 +63,8 @@ Then power on your UAP-AC-LITE, interrupt the boot timeout, and perform some ini
 ath> set bootcmd_ubnt $bootcmd
 ath> set ipaddr 192.168.99.2
 ath> set serverip 192.168.99.1
-ath> set fetchcmd tftpboot 0x84000000 kernel.img && tftpboot 0x84ffffc0 initramfs.img
-ath> set bootcmd run fetchcmd && bootm 0x84000000 0x84ffffc0
+ath> set fetchcmd 'tftpboot 0x84000000 boot/kernel.img && tftpboot 0x84ffffc0 boot/initramfs.img'
+ath> set bootcmd 'run fetchcmd && bootm 0x84000000 0x84ffffc0'
 ath> set bootdelay 5
 ath> saveenv
 ath> boot
