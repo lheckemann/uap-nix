@@ -36,6 +36,7 @@ import nixpkgs {
             self.busybox
             self.hostapd
             self.iw
+            self.socat
             (super.writeScriptBin "reset-wifi" ''
               #!/bin/sh
               cd /sys/bus/pci/drivers/ath10k_pci
@@ -68,17 +69,40 @@ import nixpkgs {
           #!/bin/sh
           set -x
           mount -t devtmpfs none /dev
+          # Set up console, both for logging and for the shell
+          </dev/ttyS0 stty 115200
+          exec >/dev/ttyS0 2>/dev/ttyS0 </dev/ttyS0
           mount -t proc proc /proc
           mount -t sysfs sys /sys
           mkdir -p /run
           mount -t tmpfs tmpfs /run
-          ip l set eth0 up
+
+          # Extract WiFi calibration data from mtd
           cal-wifi
+          # Restart the driver so it can load the calibration data
           reset-wifi
-          sleep 3 # hackhack
-          ip l set wlan0 up
-          iw dev wlan0 scan >/dev/null
+
+          # Bring up network: set up a bridge which relays ethernet <> WiFi, set an address on it (useful for ping, eventually for SSH too)
+          ip l set eth0 up
+          ip l add br0 type bridge
+          ip l set eth0 master br0
+          ip l set br0 up
+          ip a a 192.168.1.3/24 dev br0
+
+          # For debugging: allow getting a shell via unencrypted TCP connection
+          # This is not safe!
+          # socat tcp-listen:9001,fork,reuseaddr exec:sh &
+
+          # Bring WiFi up
+          while ! ip l set wlan0 up ; do sleep 0.5; done
+          iw dev wlan0 scan >/dev/null # scanning seems to be necessary to get the interface working?
           hostapd /etc/hostapd.conf &
+
+          ip l set wlan0 master br0
+
+          # Drop to a shell on serial console
+          # This is a bit incorrect, since we're pid1 and should be reaping orphaned processes.
+          # However, I don't care for now.
           exec sh
         '';
         symlink = "/init";
@@ -181,6 +205,8 @@ import nixpkgs {
         NEW_LEDS = yes;
         LEDS_CLASS = yes;
         LEDS_GPIO = yes;
+
+        BRIDGE = yes;
 
         # minimalisation
         ATH9K = no;

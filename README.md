@@ -4,10 +4,13 @@ Playing around with nixpkgs's cross-compilation support.
 
 ## Status
 
-- Linux boots!
+- Linux boots, loaded via tftp.
 - Just an initramfs for the filesystem.
 - Ethernet works in Linux.
-- A WiFi AP is set up, with WPA, and can be associated with. This doesn't actually provide access to any network (other than the link itself) yet though.
+- A WiFi AP is set up, secured with WPA2, and can be associated
+  with. This is bridged to the ethernet port. That is all. Routing,
+  DHCP and such things must be provided by a separate machine.
+- I'm now using this for my home network!
 
 ## How to use
 
