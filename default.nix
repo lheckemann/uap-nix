@@ -98,7 +98,7 @@ import nixpkgs {
           iw dev wlan0 scan >/dev/null # scanning seems to be necessary to get the interface working?
           hostapd /etc/hostapd.conf &
 
-          ip l set wlan0 master br0
+          while ! ip l set wlan0 master br0 ; do sleep 0.5; done
 
           # Drop to a shell on serial console
           # This is a bit incorrect, since we're pid1 and should be reaping orphaned processes.
