@@ -1,5 +1,5 @@
 { nixpkgs ? builtins.fetchTarball {
-    url = "https://github.com/nixos/nixpkgs/archive/58dae9ca1c2c52990e45f358b680e8411a9dfab1.tar.gz";
+    url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
   }
 , system ? builtins.currentSystem
 }:
@@ -23,7 +23,7 @@ import nixpkgs {
   overlays = [(self: super: let inherit (self) lib; in {
     openwrt-src = builtins.fetchGit {
       url = https://git.openwrt.org/openwrt/openwrt.git;
-      rev = "cbfce9236754700a343632fff8e035acbc1b1384";
+      rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
     };
 
     initramfs = super.makeInitrd {
@@ -143,11 +143,11 @@ import nixpkgs {
 
     kernelSrc = (super.applyPatches {
       inherit (self.linux_5_10) src;
-      patches = []
+      patches = lib.filter (patch: !(lib.elem (baseNameOf patch) ["0003-leds-add-reset-controller-based-driver.patch"])) ([]
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/generic/backport-5.10")
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/generic/pending-5.10")
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/ath79/patches-5.10")
-      ;
+      );
     }).overrideAttrs (o: {
       prePatch = ''
         (
