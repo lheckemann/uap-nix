@@ -2,6 +2,12 @@
     url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
   }
 , system ? builtins.currentSystem
+, settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
+    authorized_keys = ./authorized_keys.pub;
+    ipv4 = "192.168.1.3/24";
+    ssid = "uap-nix";
+    psk = "test123456";
+  }
 }:
 import nixpkgs {
   inherit system;
@@ -37,6 +43,8 @@ import nixpkgs {
             self.hostapd
             self.iw
             self.socat
+            self.tcpdump
+            self.dropbear
             (super.writeScriptBin "reset-wifi" ''
               #!/bin/sh
               cd /sys/bus/pci/drivers/ath10k_pci
@@ -68,10 +76,16 @@ import nixpkgs {
         object = super.writeScript "init" ''
           #!/bin/sh
           set -x
+          chmod go-w /
           mount -t devtmpfs none /dev
           # Set up console, both for logging and for the shell
           </dev/ttyS0 stty 115200
           exec >/dev/ttyS0 2>/dev/ttyS0 </dev/ttyS0
+
+          # For dropbear
+          mkdir -p /dev/pts
+          mount -t devpts devpts /dev/pts
+
           mount -t proc proc /proc
           mount -t sysfs sys /sys
           mkdir -p /run
@@ -87,11 +101,17 @@ import nixpkgs {
           ip l add br0 type bridge
           ip l set eth0 master br0
           ip l set br0 up
-          ip a a 192.168.1.3/24 dev br0
+          ip a a ${settings.ipv4} dev br0
 
           # For debugging: allow getting a shell via unencrypted TCP connection
           # This is not safe!
-          # socat tcp-listen:9001,fork,reuseaddr exec:sh &
+          socat tcp-listen:9001,fork,reuseaddr exec:sh,stderr &
+          dropbear -REs
+          mkdir -p /etc/dropbear
+
+          # Using a symlink initrd entry doesn't work for some reason (something skipping hidden files?)
+          mkdir -p /.ssh
+          cp ${settings.authorized_keys} /.ssh/authorized_keys
 
           # Bring WiFi up
           while ! ip l set wlan0 up ; do sleep 0.5; done
@@ -117,7 +137,7 @@ import nixpkgs {
         object = super.writeText "hostapd.conf" ''
           interface=wlan0
           hw_mode=a
-          ssid=uap-nix
+          ssid=${settings.ssid}
           country_code=DE
           ieee80211h=1
           ieee80211n=1
@@ -129,10 +149,20 @@ import nixpkgs {
           wpa=2
           wpa_key_mgmt=WPA-PSK
           rsn_pairwise=CCMP
-          wpa_passphrase=abcdefgh
+          wpa_passphrase=${settings.psk}
           channel=36
         '';
         symlink = "/etc/hostapd.conf";
+      } {
+        object = super.writeText "passwd" ''
+          root:!:0:0::/:/bin/sh
+        '';
+        symlink = "/etc/passwd";
+      } {
+        object = super.writeText "group" ''
+          root:x:0:
+        '';
+        symlink = "/etc/group";
       } ];
     };
 
