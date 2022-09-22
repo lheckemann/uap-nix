@@ -228,6 +228,8 @@ import nixpkgs {
         ATH10K_PCI = yes;
         ATH10K_DEBUG = yes;
 
+        VLAN_8021Q = yes;
+
         # Other
         IPV6 = yes;
 
