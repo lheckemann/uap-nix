@@ -103,11 +103,8 @@ import nixpkgs {
           ip l set br0 up
           ip a a ${settings.ipv4} dev br0
 
-          # For debugging: allow getting a shell via unencrypted TCP connection
-          # This is not safe!
-          socat tcp-listen:9001,fork,reuseaddr exec:sh,stderr &
-          dropbear -REs
           mkdir -p /etc/dropbear
+          dropbear -REs
 
           # Using a symlink initrd entry doesn't work for some reason (something skipping hidden files?)
           mkdir -p /.ssh

@@ -82,6 +82,7 @@ allows for a fairly fast development cycle.
 - ✅ Get WiFi working
 - Fix AP not working right away for lack of entropy (haveged?)
 - ✅ Add dropbear to the image
+  - Handle host keys better (currently generating new ones on every boot)
 - Compare and contrast with [nixwrt](https://github.com/telent/nixwrt) to see if this is worth adapting to that structure
 - Same thing but for [celun](https://github.com/celun/celun)
 - Flashable images?
