@@ -97,6 +97,7 @@ import nixpkgs {
           reset-wifi
 
           # Bring up network: set up a bridge which relays ethernet <> WiFi, set an address on it (useful for ping, eventually for SSH too)
+          ip l set lo up
           ip l set eth0 up
           ip l add br0 type bridge
           ip l set eth0 master br0
