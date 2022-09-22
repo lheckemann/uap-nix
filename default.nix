@@ -1,6 +1,10 @@
 { nixpkgs ? builtins.fetchTarball {
     url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
   }
+, openwrt-src ? builtins.fetchGit {
+  url = https://git.openwrt.org/openwrt/openwrt.git;
+  rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
+}
 , system ? builtins.currentSystem
 , settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
     authorized_keys = ./authorized_keys.pub;
@@ -27,10 +31,7 @@ import nixpkgs {
   };
   config.allowUnsupportedSystem = true;
   overlays = [(self: super: let inherit (self) lib; in {
-    openwrt-src = builtins.fetchGit {
-      url = https://git.openwrt.org/openwrt/openwrt.git;
-      rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
-    };
+    inherit openwrt-src;
 
     initramfs = super.makeInitrd {
       compressor = "${self.pkgsBuildHost.zstd}/bin/zstd";
