@@ -1,6 +1,6 @@
 { system ? builtins.currentSystem
 , nixpkgs ? null
-, openwrt-src ? null
+, openwrt-src
 , settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
     authorized_keys = ./authorized_keys.pub;
     ipv4 = "192.168.1.3/24";
@@ -30,10 +30,7 @@ in import nixpkgs {
   };
   config.allowUnsupportedSystem = true;
   overlays = [(self: super: let inherit (self) lib; in {
-    openwrt-src = args.openwrt-src or (builtins.fetchGit {
-      url = https://git.openwrt.org/openwrt/openwrt.git;
-      rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
-    });
+    openwrt-src = args.openwrt-src;
 
     initramfs = super.makeInitrd {
       compressor = "${self.pkgsBuildHost.zstd}/bin/zstd";
