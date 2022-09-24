@@ -9,10 +9,6 @@
   }
 }@args:
 let
-  openwrt-src = args.openwrt-src or (builtins.fetchGit {
-    url = https://git.openwrt.org/openwrt/openwrt.git;
-    rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
-  });
   nixpkgs = args.nixpkgs or (builtins.fetchTarball {
     url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
   });
@@ -34,7 +30,10 @@ in import nixpkgs {
   };
   config.allowUnsupportedSystem = true;
   overlays = [(self: super: let inherit (self) lib; in {
-    inherit openwrt-src;
+    openwrt-src = args.openwrt-src or (builtins.fetchGit {
+      url = https://git.openwrt.org/openwrt/openwrt.git;
+      rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
+    });
 
     initramfs = super.makeInitrd {
       compressor = "${self.pkgsBuildHost.zstd}/bin/zstd";
