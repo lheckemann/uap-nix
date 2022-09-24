@@ -1,19 +1,22 @@
-{ nixpkgs ? builtins.fetchTarball {
-    url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
-  }
-, openwrt-src ? builtins.fetchGit {
-  url = https://git.openwrt.org/openwrt/openwrt.git;
-  rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
-}
-, system ? builtins.currentSystem
+{ system ? builtins.currentSystem
+, nixpkgs ? null
+, openwrt-src ? null
 , settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
     authorized_keys = ./authorized_keys.pub;
     ipv4 = "192.168.1.3/24";
     ssid = "uap-nix";
     psk = "test123456";
   }
-}:
-import nixpkgs {
+}@args:
+let
+  openwrt-src = args.openwrt-src or (builtins.fetchGit {
+    url = https://git.openwrt.org/openwrt/openwrt.git;
+    rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
+  });
+  nixpkgs = args.nixpkgs or (builtins.fetchTarball {
+    url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
+  });
+in import nixpkgs {
   inherit system;
   crossSystem = {
     libc = "musl";
@@ -236,6 +239,7 @@ import nixpkgs {
         NEW_LEDS = yes;
         LEDS_CLASS = yes;
         LEDS_GPIO = yes;
+        LEDS_TRIGGERS = yes;
 
         BRIDGE = yes;
 
