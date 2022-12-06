@@ -1,9 +1,9 @@
 { nixpkgs ? builtins.fetchTarball {
-    url = "https://github.com/nixos/nixpkgs/archive/d86a4619b7e80bddb6c01bc01a954f368c56d1df.tar.gz";
+    url = "https://github.com/nixos/nixpkgs/archive/7e72265b08d4c60f414a0f3ab162e24648e84342.tar.gz";
   }
 , openwrt-src ? builtins.fetchGit {
   url = https://git.openwrt.org/openwrt/openwrt.git;
-  rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
+  rev = "acb10faa35748ca3a7e0f559c431a1a752fdc529";
 }
 , system ? builtins.currentSystem
 , settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
@@ -172,7 +172,10 @@ import nixpkgs {
 
     kernelSrc = (super.applyPatches {
       inherit (self.linux_5_10) src;
-      patches = lib.filter (patch: !(lib.elem (baseNameOf patch) ["0003-leds-add-reset-controller-based-driver.patch"])) ([]
+      patches = lib.filter (patch: !(lib.any (pattern: builtins.match pattern (baseNameOf patch) == null) [
+        "0003-leds-add-reset-controller-based-driver.patch"
+        "610-v5.13-32-net-.*(mtk|mediatek).*"
+      ])) ([]
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/generic/backport-5.10")
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/generic/pending-5.10")
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/ath79/patches-5.10")
