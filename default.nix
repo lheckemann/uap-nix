@@ -3,7 +3,7 @@
   }
 , openwrt-src ? builtins.fetchGit {
   url = https://git.openwrt.org/openwrt/openwrt.git;
-  rev = "acb10faa35748ca3a7e0f559c431a1a752fdc529";
+  rev = "5429411f732ba76eced30b5b596ec9c0374d0965";
 }
 , system ? builtins.currentSystem
 , settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
@@ -172,10 +172,12 @@ import nixpkgs {
 
     kernelSrc = (super.applyPatches {
       inherit (self.linux_5_10) src;
-      patches = lib.filter (patch: !(lib.any (pattern: builtins.match pattern (baseNameOf patch) == null) [
+      patches = lib.filter (patch: lib.all (pattern: builtins.match pattern (baseNameOf patch) == null) [
         "0003-leds-add-reset-controller-based-driver.patch"
-        "610-v5.13-32-net-.*(mtk|mediatek).*"
-      ])) ([]
+        "704-02-net-fix-dev_fill_forward_path-with-pppoe-bridge.patch"
+        "706-netfilter-nf_flow_table-add-missing-locking.patch"
+        ".*(-mtk|mediatek).*"
+      ]) ([]
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/generic/backport-5.10")
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/generic/pending-5.10")
       ++ (lib.filesInDir "${self.openwrt-src}/target/linux/ath79/patches-5.10")
