@@ -1,0 +1,43 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1663067291,
+        "narHash": "sha256-1BTrqhLMamWf53sJobtMiUDI91PEw6xF8YEwg2VE8w4=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d86a4619b7e80bddb6c01bc01a954f368c56d1df",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-22.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "openwrt": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1663183618,
+        "narHash": "sha256-uMuk3R8N0IGLL7Qkq3zjvOZvKVgT1PDP7m7lOGy7HQk=",
+        "rev": "8010d3da0376f68dd3724c30db0c4c9c513e5376",
+        "revCount": 55109,
+        "type": "git",
+        "url": "https://git.openwrt.org/openwrt/openwrt.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.openwrt.org/openwrt/openwrt.git"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "openwrt": "openwrt"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

@@ -6,12 +6,7 @@
   rev = "8010d3da0376f68dd3724c30db0c4c9c513e5376";
 }
 , system ? builtins.currentSystem
-, settings ? if builtins.pathExists ./local.nix then import ./local.nix else {
-    authorized_keys = ./authorized_keys.pub;
-    ipv4 = "192.168.1.3/24";
-    ssid = "uap-nix";
-    psk = "test123456";
-  }
+, settings ? if builtins.pathExists ./local.nix then import ./local.nix else import ./sample-settings.nix
 }:
 import nixpkgs {
   inherit system;
