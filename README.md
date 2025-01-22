@@ -1,5 +1,7 @@
 # Simple Nix-based OS for Unifi AP (AC-Lite)
 
+**Archival notice:** I no longer use this, but it may still be interesting as a curiosity and an example of how to build a useful Linux system with less than 300 lines of Nix :)
+
 Playing around with nixpkgs's cross-compilation support.
 
 ## Status
